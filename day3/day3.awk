@@ -17,8 +17,6 @@ function calculateCoordinates(target) {
 		direction = substr($i, 1, 1)
 		amount = substr($i, 2)
 
-		printf "direction %s, amount %d\n", direction, amount
-
 		if (direction == "U") {
 			y += amount
 		}
@@ -34,8 +32,6 @@ function calculateCoordinates(target) {
 		if (direction == "R") {
 			x += amount
 		}
-
-		printf "current location X: %d Y: %d\n", x, y
 
 		target[i] = prevX ":" prevY ":" x ":" y 
 
@@ -63,7 +59,6 @@ function findIntersections(seriesA, seriesB, result) {
 
 			if (aDirection != bDirection) {
 				#now we do a bounds check. First we determine the min and max coords
-
 				if (aDirection == 1) {
 					copyArray(aCoords, hLine)
 					copyArray(bCoords, vLine)
@@ -81,7 +76,6 @@ function findIntersections(seriesA, seriesB, result) {
 
 				# make sure the vertical line is between the bounds of the horizontal line
 				if (vLineX < xmin || vLineX > xmax) {
-					print "lines don't cross. X out of bounds"
 					continue
 				}
 
@@ -91,15 +85,11 @@ function findIntersections(seriesA, seriesB, result) {
 				hLineY = hLine[2]
 
 				if (hLineY < ymin || hLineY > ymax) {
-					print "lines don't cross. Y out of bounds"
 					continue
 				}
 
 				# the lines must cross now. The result will be the X of vertical line and the Y
 				# of the horizontal line
-
-				printf "intersection found: x %d y %d\n", vLineX, hLineY
-
 				result[currentResultIndex] = vLineX ":" hLineY
 				currentResultIndex++
 			}
@@ -113,8 +103,6 @@ function findShortestDistance(intersections) {
 		split(intersections[i], coords, ":")
 		distance = abs(coords[1]) + abs(coords[2])
 
-		printf "distance to %d %d is %d\n", coords[1], coords[2], distance
-
 		if (shortest == 0 || distance < shortest) {
 			shortest = distance
 			coord = intersections[i]
@@ -124,11 +112,50 @@ function findShortestDistance(intersections) {
 	return shortest
 }
 
-function getSteps(series, location, 	coords) {
+function getSteps(series, location, 		i, coords, target, distance) {
+	split(location, loc, ":")
+
 	for (i in series) {
 		split(series[i], coords, ":")
 
+		distance = abs(coords[4] - coords[2]) + abs(coords[3] - coords[1])
+
 		# check if the next line contains the intersection
+		# If our line is horizontal we need to share the same Y coordinate
+		# If our line is vertical we need to share the same X coordinate
+		# the bounds will also have to be checked
+		horizontal = coords[1] != coords[3]
+		if (horizontal == 1 && loc[2] != coords[4]) {
+			steps += distance
+			continue
+		}
+
+		if (horizontal == 0 && loc[1] != coords[3]) {
+			steps += distance
+			continue
+		}
+
+		# we are in the same plane. Do a bounds check. When we are horizontal we have to make sure
+		# the X is in bounds. When vertical the Y must be in bounds
+
+		xmin = coords[1] < coords[3] ? coords[1] : coords[3]
+		xmax = coords[1] > coords[3] ? coords[1] : coords[3]
+		ymin = coords[2] < coords[4] ? coords[2] : coords[4]
+		ymax = coords[2] > coords[4] ? coords[2] : coords[4]
+
+		if (horizontal && (loc[1] < xmin || loc[1] > xmax)) {
+			steps += distance
+			continue
+		}
+
+		if (!horizontal && (loc[2] < ymin || loc[2] > ymax)) {
+			steps += distance
+			continue
+		}
+
+		# the intersection is on this line. Calulate the distance and return
+		steps += abs(loc[1] - coords[1]) + abs(loc[2] - coords[2])
+		return
 	}
 }
 
@@ -144,12 +171,10 @@ function copyArray(source, target, 		i) {
 
 {
 	if (NR == 1) {
-		print "calculating coordinates for A"
 		calculateCoordinates(seriesA)
 	}
 
 	if (NR == 2) {
-	print "calculating coordinates for B"
 		calculateCoordinates(seriesB)
 	}
 }
@@ -159,10 +184,24 @@ END {
 	findIntersections(seriesA, seriesB, intersections)
 	shortest = findShortestDistance(intersections)
 
-	print shortest
+	print "Part 1: " shortest
 
-	getSteps(seriesA, coord)
-	getSteps(seriesB, coord)
 
-	print steps
+	shortest = 0
+	for (i in intersections) {
+		intersection = intersections[i]
+		if (intersection == "0:0") {
+			continue
+		}
+
+		steps = 0
+		getSteps(seriesA, intersection)
+		getSteps(seriesB, intersection)
+
+		if (shortest == 0 || steps < shortest) {
+			shortest = steps
+		}
+	}
+
+	print "Part 2: " shortest
 }
