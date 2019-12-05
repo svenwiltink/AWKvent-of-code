@@ -94,6 +94,59 @@ END {
 			pc += 2
 			continue
 		}
+
+		# jump-if-true
+		if (opcode == 5) {
+			if (p1 > 0) {
+
+				if (debug) {
+					printf "jumping to %d because %d > 0", p2, p1
+				}
+				pc = p2
+				continue
+			}
+
+			pc += 3
+			continue
+		}
+
+		# jump-if-false
+		if (opcode == 6) {
+			if (p1 == 0) {
+				if (debug) {
+					printf "jumping to %d because %d == 0", p2, p1
+				}
+				pc = p2
+				continue
+			}
+
+			pc += 3
+			continue
+		}	
+
+		# less than
+		if (opcode == 7) {
+			location = data[pc+3]
+			value = p1 < p2
+
+			printf "storing %d in %d", value, location
+			data[location] = value
+
+			pc += 4
+			continue
+		}	
+
+		# equal
+		if (opcode == 8) {
+			location = data[pc+3]
+			value = p1 == p2
+
+			printf "storing %d in %d", value, location
+			data[location] = value
+
+			pc += 4
+			continue
+		}			
 	}
 
 	print "end"
