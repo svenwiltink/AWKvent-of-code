@@ -12,13 +12,36 @@ BEGIN {
 }
 
 END {
-	
-	generateSettings(generatedSettings)
+	part1()
+}
 
+function part1(			generatedSettings) {
+	generateP1Settings(generatedSettings)	
+	startWithSettings(generatedSettings)
+
+	printf "Max output %s with %settings", max, maxSettings
+}
+
+function startWithSettings(generatedSettings) {
 	max = 0
 	for (settingsString in generatedSettings) {
 		printf "trying settings %s\n", settingsString
 		split(settingsString, settings, "")
+
+
+		# reset the amp data and program counters
+		copyArray(pdata, ampAData)
+		copyArray(pdata, ampBData)
+		copyArray(pdata, ampCData)
+		copyArray(pdata, ampDData)
+		copyArray(pdata, ampEData)
+
+
+		ampAState["pc"] = 0
+		ampBState["pc"] = 0
+		ampCState["pc"] = 0
+		ampDState["pc"] = 0
+		ampEState["pc"] = 0
 
 		ampOutput = 0
 		for (i=1; i<= 5; i++) {
@@ -30,7 +53,12 @@ END {
 			ampVariables[1] = ampOutput
 
 			copyArray(pdata, data)
-			ampOutput = startProgram(ampVariables)
+
+			if (i == 1) ampOutput = startProgram(ampAData, ampVariables, ampAState)
+			if (i == 2) ampOutput = startProgram(ampBData, ampVariables, ampBState)
+			if (i == 3) ampOutput = startProgram(ampCData, ampVariables, ampCState)
+			if (i == 4) ampOutput = startProgram(ampDData, ampVariables, ampDState)
+			if (i == 5) ampOutput = startProgram(ampEData, ampVariables, ampEState)
 		}
 
 		printf "output: %s\n", ampOutput
@@ -40,12 +68,10 @@ END {
 			maxSettings = settingsString
 		}
 	}
-	
-	printf "Max output %s with %settings", max, maxSettings
 }
 
 # super lazy way to generate the settings
-function generateSettings(result,		i) {
+function generateP1Settings(result,		i) {
 	start = 01234
 	end = 43210
 
@@ -79,19 +105,20 @@ function checkDouble(digits, 		i, encountered) {
 	return 0
 }
 
+
 function copyArray(source, target, 		i) {
 	for (i in source) {
 		target[i] = source[i]
 	}
 }
 
-function startProgram(variables) {
-	pc = 0
+function startProgram(ampData, variables, ampState) {
+	pc = int(ampState["pc"])
 	variableIndex = 0
 	outputString = ""
 
 	while (pc < count) {
-		instruction = data[pc]
+		instruction = ampData[pc]
 		instruction = sprintf("%05d", instruction)
 		match(instruction, "^([0-9]{1})([0-9]{1})([0-9]{1})([0-9]{1})([0-9]{1})$", matches)
 
@@ -107,40 +134,40 @@ function startProgram(variables) {
 			break
 		}
 
-		p1Index = data[pc+1]
-		p2Index = data[pc+2]
-		p3Index = data[pc+3]
+		p1Index = ampData[pc+1]
+		p2Index = ampData[pc+2]
+		p3Index = ampData[pc+3]
 
-		p1 = p1Mode == 1 ? p1Index : data[p1Index]
-		p2 = p2Mode == 1 ? p2Index : data[p2Index]
-		p3 = p3Mode == 1 ? p3Index : data[p3Index]
+		p1 = p1Mode == 1 ? p1Index : ampData[p1Index]
+		p2 = p2Mode == 1 ? p2Index : ampData[p2Index]
+		p3 = p3Mode == 1 ? p3Index : ampData[p3Index]
 
 		if (debug) {
 			print ""
 			printf "PC: %d\n", pc
 			printf "instruction: %s\n", instruction
-			printf "data %d %d %d %d\n", data[pc], data[pc+1], data[pc+2], data[pc+3]
+			printf "data %d %d %d %d\n", ampData[pc], ampData[pc+1], ampData[pc+2], ampData[pc+3]
 			printf "opcode: %d. p1 %s, p2: %s p3: %d\n", opcode, p1, p2, p3
 		}
 
 		# add
 		if (opcode == 1) {
-			location = data[pc+3]
+			location = ampData[pc+3]
 			newValue = p1 + p2
 
 			if (debug) printf "storing %d in %d\n", newValue, location
-			data[location] = newValue
+			ampData[location] = newValue
 			pc += 4
 			continue
 		}
 
 		# multiply
 		if (opcode == 2) {
-			location = data[pc+3]
+			location = ampData[pc+3]
 			newValue = p1 * p2
 
 			if (debug) printf "storing %d in %d\n", newValue, location
-			data[location] = newValue
+			ampData[location] = newValue
 			pc += 4
 			continue
 		}
@@ -150,24 +177,26 @@ function startProgram(variables) {
 			
 			if (debug) {
 				printf "reading variableIndex %d\n", variableIndex
-				printf "Storing %d in location %d\n", banana, data[pc+1]
+				printf "Storing %d in location %d\n", banana, ampData[pc+1]
 			}
 
 			variableIndex++
-			data[data[pc+1]] = banana
+			ampData[ampData[pc+1]] = banana
 			pc += 2
 			continue
 		}
 
 		if (opcode == 4) {
 			if (debug) print ""
-			if (debug) printf "DIAGNOSTICS %d\n", data[p1Index]
+			if (debug) printf "DIAGNOSTICS %d\n", ampData[p1Index]
 			if (debug) print ""
 
-			outputString = outputString "" data[p1Index]
+			outputString = outputString "" ampData[p1Index]
 
 			pc += 2
-			continue
+
+			ampState["pc"] = pc
+			return outputString
 		}
 
 		# jump-if-true
@@ -201,11 +230,11 @@ function startProgram(variables) {
 
 		# less than
 		if (opcode == 7) {
-			location = data[pc+3]
+			location = ampData[pc+3]
 			value = p1 < p2
 
 			printf "storing %d in %d", value, location
-			data[location] = value
+			ampData[location] = value
 
 			pc += 4
 			continue
@@ -213,11 +242,11 @@ function startProgram(variables) {
 
 		# equal
 		if (opcode == 8) {
-			location = data[pc+3]
+			location = ampData[pc+3]
 			value = p1 == p2
 
 			printf "storing %d in %d", value, location
-			data[location] = value
+			ampData[location] = value
 
 			pc += 4
 			continue
