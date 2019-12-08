@@ -12,20 +12,30 @@ BEGIN {
 }
 
 END {
-	part1()
+	generateSettings(part1Settings, part2Settings)
+	part1Answer = part1(part1Settings)
+	part2Answer = part2(part2Settings)
+
+	printf "Part1: %s\n", part1Answer
+	printf "Part2: %s\n", part2Answer
 }
 
-function part1(			generatedSettings) {
-	generateP1Settings(generatedSettings)	
-	startWithSettings(generatedSettings)
+function part1(generatedSettings) {
+	startWithSettings(generatedSettings, 0)
 
-	printf "Max output %s with %settings", max, maxSettings
+	return sprintf("Max output %s with %settings", max, maxSettings)
 }
 
-function startWithSettings(generatedSettings) {
+function part2(generatedSettings) {
+	startWithSettings(generatedSettings, 1)
+
+	return sprintf("Max output %s with %settings\n", max, maxSettings)
+}
+
+function startWithSettings(generatedSettings, withFeedback) {
 	max = 0
 	for (settingsString in generatedSettings) {
-		printf "trying settings %s\n", settingsString
+		if (debug) printf "trying settings %s\n", settingsString
 		split(settingsString, settings, "")
 
 
@@ -43,14 +53,25 @@ function startWithSettings(generatedSettings) {
 		ampDState["pc"] = 0
 		ampEState["pc"] = 0
 
-		ampOutput = 0
-		for (i=1; i<= 5; i++) {
-			if (debug) {
-				printf "starting AMP %s with settings %s and input %s", i, settings[i], ampInput
-			}
+		ampAState["HALT"] = 0
+		ampBState["HALT"] = 0
+		ampCState["HALT"] = 0
+		ampDState["HALT"] = 0
+		ampEState["HALT"] = 0
 
-			ampVariables[0] = settings[i]
-			ampVariables[1] = ampOutput
+		lastAmpOutput = 0
+		ampOutput = 0
+		firstRun = 1
+		i = 1
+		while (1==1) {
+			if (debug) printf "starting AMP %s with settings %s and input %s\n", i, settings[i], ampOutput
+
+			if (firstRun) {
+				ampVariables[0] = settings[i]
+				ampVariables[1] = ampOutput
+			} else {
+				ampVariables[0] = ampOutput
+			}
 
 			copyArray(pdata, data)
 
@@ -58,10 +79,30 @@ function startWithSettings(generatedSettings) {
 			if (i == 2) ampOutput = startProgram(ampBData, ampVariables, ampBState)
 			if (i == 3) ampOutput = startProgram(ampCData, ampVariables, ampCState)
 			if (i == 4) ampOutput = startProgram(ampDData, ampVariables, ampDState)
-			if (i == 5) ampOutput = startProgram(ampEData, ampVariables, ampEState)
+			if (i == 5) {
+				ampOutput = startProgram(ampEData, ampVariables, ampEState)
+				if (withFeedback && ampEState["HALT"] == 1) {
+					ampOutput = lastAmpOutput
+					break
+				}
+
+				lastAmpOutput = ampOutput
+			}
+
+			if (!withFeedback && i == 5) {
+				break
+			}
+
+			if (withFeedback && i == 5) {
+				i = 1
+				firstRun = 0
+				continue
+			}
+
+			i++
 		}
 
-		printf "output: %s\n", ampOutput
+		if (debug) printf "output: %s\n", ampOutput
 
 		if (int(ampOutput) > int(max)) {
 			max = ampOutput
@@ -71,23 +112,28 @@ function startWithSettings(generatedSettings) {
 }
 
 # super lazy way to generate the settings
-function generateP1Settings(result,		i) {
+function generateSettings(part1Settings, part2Settings,		i) {
 	start = 01234
-	end = 43210
+	end = 98765
 
 	for (i = start; i <= end; i++) {
 		setting = sprintf("%05d", i)
 		split(setting, digits, "")
 
-		if (match(i, "[5-9]", matches)) {
-			continue
-		}
-
 		if (checkDouble(digits)) {
 			continue
 		}
 
-		result[setting] = 1
+		has0to4 = match(i, "[0-4]", matches)
+		has5to9 = match(i, "[5-9]", matches)
+
+		if (has0to4 && ! has5to9) {
+			part1Settings[setting] = 1
+		}
+
+		if (has5to9 && !has0to4) {
+			part2Settings[setting] = 1
+		}
 	}
 }
 
@@ -130,8 +176,8 @@ function startProgram(ampData, variables, ampState) {
 
 
 		if (opcode == 99) {
+			ampState["HALT"] = 1
 			return outputString
-			break
 		}
 
 		p1Index = ampData[pc+1]
@@ -173,6 +219,7 @@ function startProgram(ampData, variables, ampState) {
 		}
 
 		if (opcode == 3) {
+
 			banana = variables[variableIndex]
 			
 			if (debug) {
