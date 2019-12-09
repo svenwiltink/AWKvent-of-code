@@ -10,8 +10,6 @@ function resetIntCode(pState) {
 # variables contains the variables to read when opcode 3 is encountered
 # pState will contain the program counter (pc), relative counter (rc) and HALT keys when returned
 # pState can be fed back into startIntCode to resume a previous state
-#
-# by default opcode 4 (print) will make the function return
 function startIntCode(pData, variables, pState) {
 	pc = int(pState["pc"])
 	rc = int(pState["rc"])
@@ -37,9 +35,9 @@ function startIntCode(pData, variables, pState) {
 		p2 = p2Mode == 1 ? p2Index : pData[p2Index]
 		p3 = p3Mode == 1 ? p3Index : pData[p3Index]
 
-		p1 = p1Mode == 2 ? p1Index + rc : p1
-		p2 = p2Mode == 2 ? p2Index + rc : p2
-		p3 = p3Mode == 2 ? p3Index + rc : p3
+		p1 = p1Mode == 2 ? pData[p1Index + rc] : p1
+		p2 = p2Mode == 2 ? pData[p2Index + rc] : p2
+		p3 = p3Mode == 2 ? pData[p3Index + rc] : p3
 
 		if (debug) {
 			print ""
@@ -110,7 +108,6 @@ function startIntCode(pData, variables, pState) {
 			pc += 2
 
 			pState["pc"] = pc
-			#return outputString
 			continue
 		}
 
