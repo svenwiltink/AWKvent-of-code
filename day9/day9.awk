@@ -13,5 +13,9 @@ BEGIN {
 }
 
 END {
-	startIntCode(pdata, ampVariables, ampAState)
+	pvariables[0] = 1
+	startIntCode(pdata, pvariables, pstate)
+	for (p in pstate) {
+		print p, pstate[p]
+	}
 }

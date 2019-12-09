@@ -29,12 +29,6 @@ function startIntCode(pData, variables, pState) {
 		p2Mode = matches[2]
 		p3Mode = matches[1]
 
-
-		if (opcode == 99) {
-			pState["HALT"] = 1
-			return outputString
-		}
-
 		p1Index = pData[pc+1]
 		p2Index = pData[pc+2]
 		p3Index = pData[pc+3]
@@ -43,17 +37,30 @@ function startIntCode(pData, variables, pState) {
 		p2 = p2Mode == 1 ? p2Index : pData[p2Index]
 		p3 = p3Mode == 1 ? p3Index : pData[p3Index]
 
+		p1 = p1Mode == 2 ? p1Index + rc : p1
+		p2 = p2Mode == 2 ? p2Index + rc : p2
+		p3 = p3Mode == 2 ? p3Index + rc : p3
+
 		if (debug) {
 			print ""
 			printf "PC: %d\n", pc
+			printf "RC: %d\n", rc
 			printf "instruction: %s\n", instruction
+			printf ""
 			printf "data %d %d %d %d\n", pData[pc], pData[pc+1], pData[pc+2], pData[pc+3]
 			printf "opcode: %d. p1 %s, p2: %s p3: %d\n", opcode, p1, p2, p3
 		}
 
+		if (opcode == 99) {
+			pState["HALT"] = 1
+			return outputString
+		}
+
 		# add
 		if (opcode == 1) {
-			location = pData[pc+3]
+			location = p3Index
+			location = p3Mode == 2 ? location + rc : location
+
 			newValue = p1 + p2
 
 			if (debug) printf "storing %d in %d\n", newValue, location
@@ -64,7 +71,9 @@ function startIntCode(pData, variables, pState) {
 
 		# multiply
 		if (opcode == 2) {
-			location = pData[pc+3]
+			location = p3Index
+			location = p3Mode == 2 ? location + rc : location
+
 			newValue = p1 * p2
 
 			if (debug) printf "storing %d in %d\n", newValue, location
@@ -76,29 +85,33 @@ function startIntCode(pData, variables, pState) {
 		if (opcode == 3) {
 
 			banana = variables[variableIndex]
+
+			location = p1Index
+			location = p1Mode == 2 ? location + rc : location
 			
 			if (debug) {
 				printf "reading variableIndex %d\n", variableIndex
-				printf "Storing %d in location %d\n", banana, pData[pc+1]
+				printf "Storing %d in location %d\n", banana, location
 			}
 
 			variableIndex++
-			pData[pData[pc+1]] = banana
+			pData[location] = banana
 			pc += 2
 			continue
 		}
 
 		if (opcode == 4) {
 			if (debug) print ""
-			if (debug) printf "DIAGNOSTICS %d\n", pData[p1Index]
+			if (debug) printf "DIAGNOSTICS %d\n", p1
 			if (debug) print ""
 
-			outputString = outputString "" pData[p1Index]
+			outputString = outputString "" p1
 
 			pc += 2
 
 			pState["pc"] = pc
-			return outputString
+			#return outputString
+			continue
 		}
 
 		# jump-if-true
@@ -106,7 +119,7 @@ function startIntCode(pData, variables, pState) {
 			if (p1 > 0) {
 
 				if (debug) {
-					printf "jumping to %d because %d > 0", p2, p1
+					printf "jumping to %d because %d > 0\n", p2, p1
 				}
 				pc = p2
 				continue
@@ -120,7 +133,7 @@ function startIntCode(pData, variables, pState) {
 		if (opcode == 6) {
 			if (p1 == 0) {
 				if (debug) {
-					printf "jumping to %d because %d == 0", p2, p1
+					printf "jumping to %d because %d == 0\n", p2, p1
 				}
 				pc = p2
 				continue
@@ -132,10 +145,12 @@ function startIntCode(pData, variables, pState) {
 
 		# less than
 		if (opcode == 7) {
-			location = pData[pc+3]
+			location = p3Index
+			location = p3Mode == 2 ? location + rc : location
+
 			value = p1 < p2
 
-			printf "storing %d in %d", value, location
+			printf "storing %d in %d\n", value, location
 			pData[location] = value
 
 			pc += 4
@@ -144,7 +159,8 @@ function startIntCode(pData, variables, pState) {
 
 		# equal
 		if (opcode == 8) {
-			location = pData[pc+3]
+			location = p3Index
+			location = p3Mode == 2 ? location + rc : location
 			value = p1 == p2
 
 			printf "storing %d in %d\n", value, location
