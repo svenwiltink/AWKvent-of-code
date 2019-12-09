@@ -5,6 +5,12 @@ function resetIntCode(pState) {
 	pState["HALT"] = 0
 }
 
+function copyArray(source, target, 		i) {
+	for (i in source) {
+		target[i] = source[i]
+	}
+}
+
 # startIntCode starts an intcode machine.
 # pDate contains the program data,
 # variables contains the variables to read when opcode 3 is encountered

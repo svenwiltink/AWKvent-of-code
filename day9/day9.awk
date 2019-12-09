@@ -12,6 +12,13 @@ BEGIN {
 }
 
 END {
-	pvariables[0] = 1
-	print startIntCode(pdata, pvariables, pstate)
+
+	copyArray(pdata, part1Data)
+	copyArray(pdata, part2Data)
+
+	part1Variables[0] = 1
+	print startIntCode(part1Data, part1Variables, part1State)
+
+	part2Variables[0] = 2
+	print startIntCode(part2Data, part2Variables, part2State)
 }
