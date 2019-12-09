@@ -129,9 +129,7 @@ function startIntCode(pData, variables, pState) {
 		# jump-if-false
 		if (opcode == 6) {
 			if (p1 == 0) {
-				if (debug) {
-					printf "jumping to %d because %d == 0\n", p2, p1
-				}
+				if (debug) printf "jumping to %d because %d == 0\n", p2, p1
 				pc = p2
 				continue
 			}
@@ -147,7 +145,7 @@ function startIntCode(pData, variables, pState) {
 
 			value = p1 < p2
 
-			printf "storing %d in %d\n", value, location
+			if (debug) printf "storing %d in %d\n", value, location
 			pData[location] = value
 
 			pc += 4
@@ -160,7 +158,7 @@ function startIntCode(pData, variables, pState) {
 			location = p3Mode == 2 ? location + rc : location
 			value = p1 == p2
 
-			printf "storing %d in %d\n", value, location
+			if (debug) printf "storing %d in %d\n", value, location
 			pData[location] = value
 
 			pc += 4
@@ -169,7 +167,7 @@ function startIntCode(pData, variables, pState) {
 
 		if (opcode == 9) {
 			rc += p1
-			printf "increasing rc with %d, now %d\n", p1, rc
+			if (debug) printf "increasing rc with %d, now %d\n", p1, rc
 			pc += 2
 		}			
 	}

@@ -13,5 +13,5 @@ BEGIN {
 
 END {
 	pvariables[0] = 1
-	startIntCode(pdata, pvariables, pstate)
+	print startIntCode(pdata, pvariables, pstate)
 }
