@@ -42,6 +42,32 @@ function checkLOS(coordA, coordB, points, 		asteroid) {
 	bX = int(coordsB[1])
 	bY = int(coordsB[2])
 
+	angleAB = atan2(bY-aY, bX-aX)
+	distanceAB = (bY-aY)*(bY-aY) + (bX-aX)*(bX-aX) 
+
+	if (debug) printf "AB angle %s, distance %s\n", angleAB, distanceAB
+
+	for (asteroid in points) {
+		if (asteroid == coordA || asteroid == coordB) {
+			if (debug) printf "not checking same coord: %s\n", asteroid
+			continue
+		}
+
+		split(asteroid, coordsC, ":")
+
+		cX = int(coordsC[1])
+		cY = int(coordsC[2])
+
+		angleAC = atan2(cY-aY, cX-aX)
+		distanceAC = (cY-aY)*(cY-aY) + (cX-aX)*(cX-aX) 
+		if (debug) printf "AC angle %s, distance %s\n", angleAB, distanceAB
+
+		if (angleAB == angleAC && distanceAC < distanceAB) {
+			if (debug) print "WE HAVE A WINNER ", angleAB, angleAC 
+			return 1
+		}
+	}
+
 	return 0
 }
 
@@ -57,5 +83,5 @@ END {
 		printf "%s can view %s\n", coord, count
 	}
 
-	print maxPosition
+	printf "postion %s, can observe %s\n", maxPosition, max
 }
