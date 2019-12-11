@@ -16,11 +16,10 @@ END {
 	copyArray(pdata, part2Data)
 
 	part1()
-	#part2()
+	part2()
 }
 
 function part1() {
-	part1Map["0:0"] = 0
 	paint(part1Map, part1Data)
 
 	for (i in part1Map) {
@@ -31,16 +30,9 @@ function part1() {
 }
 
 function part2() {
-	part2Map["0:0"] = 0
-	#displayMap = 1
+	part2Map["0:0"] = 1
+	displayMap = 1
 	paint(part2Map, part2Data)
-
-	painted = 0 
-	for (i in part2Map) {
-		painted++
-	}
-
-	printf "total panels: %d\n", painted
 }
 
 function paint(map, intCodeInstruction, 	x, y, part1State) {
@@ -138,12 +130,12 @@ function paint(map, intCodeInstruction, 	x, y, part1State) {
 }
 
 function printMap(map, xMin, xMax, yMin, yMax,		x, y, currentColour) {
-	for (y=yMax; y>=0; y--) {
+	for (y=yMax; y>=yMin-1; y--) {
 		for (x=xMin; x<=xMax;x++) {
 			currentColour = "."
 
 			if ((x ":" y) in map) {
-				currentColour = int(map[x ":" y]) == 0 ? "0" : "#"
+				currentColour = int(map[x ":" y]) == 0 ? "." : "#"
 			}			
 
 			printf currentColour

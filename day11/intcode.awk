@@ -114,11 +114,12 @@ function startIntCode(pData, options, variables, pState) {
 			pc += 2
 
 			pState["pc"] = pc
+			pState["rc"] = rc
 
 			if (options["return-on-print"]) {
 				return outputString
 			}
-			
+
 			continue
 		}
 
