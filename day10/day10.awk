@@ -85,3 +85,77 @@ END {
 
 	printf "postion %s, can observe %s\n", maxPosition, max
 }
+
+function calculateAngles(result, coord, points) {
+	split(coord, coordsA, ":")
+
+	aX = int(coordsA[1])
+	aY = int(coordsA[2])
+
+
+	SORTPOINT = coord
+	amount = asorti(points, result, "compareDistanceAndAngle")
+	for (i=1; i<= amount; i++) {
+		print result[i]
+	}
+}
+
+function part2() {
+	#coord = "26:29"
+	coord = "11:13"
+	calculateAngles(result, coord, points)
+}
+
+function compareDistanceAndAngle(coordA, v1, coordB, v2,    l, r)
+{
+	print ""
+	split(coordA, coordsA, ":")
+    split(coordB, coordsB, ":")
+    split(SORTPOINT, coordsO, ":")
+
+	aX = int(coordsA[1])
+	aY = int(coordsA[2])
+
+	bX = int(coordsB[1])
+	bY = int(coordsB[2])
+
+	oX = int(coordsO[1])
+	oY = int(coordsO[2])
+
+	angleOA = atan2(-(aX-oX), -(aY-oY))
+	distanceOA = (aY-oY)*(aY-oY) + (aX-oX)*(aX-oX) 
+
+	printf "coord A %s. Angle %s, distance %s\n", coordA, angleOA, distanceOA
+
+	angleOB = atan2(-(bX-oX), -(bY-oY))
+	distanceOB = (bY-oY)*(bY-oY) + (bX-oX)*(bX-oX) 
+
+	printf "coord B %s. Angle %s, distance %s\n", coordB, angleOB, distanceOB
+
+	if (angleOA < angleOB) {
+		print "return -1"
+		return -1
+	}
+
+	if (angleOA > angleOB) {
+		print "return 1"
+		return 1
+	}
+
+	if (distanceOA < distanceOB) {
+		print "return -1"
+		return -1
+	}
+
+	if (distanceOA > distanceOB) {
+		return 1
+	}
+
+	return 0
+}
+
+
+END {
+	#part1()
+	part2()
+}
