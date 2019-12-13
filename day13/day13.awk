@@ -81,38 +81,44 @@ function playGame(screen, intCodeInstruction,		intOptions, intVariables, intStat
 }
 
 function printMap(map, 	x, y, currentColour) {
-	buffer = "Score: " map["-1:0"] " \n\n"
-	for (y=yMin; y<=yMax; y++) {
-		for (x=xMin; x<=xMax;x++) {
-			currentColour = " "
+	frameCount = frameCount % 10
+	frameCount++
 
-			if ((x ":" y) in map) {
-				mode = map[x ":" y]
-				if (mode == 1) {
-					currentColour = "1"
-				}
+	if (frameCount == 1) {
+		buffer = "Score: " map["-1:0"] " \n\n"
+		for (y=yMin; y<=yMax; y++) {
+			for (x=xMin; x<=xMax;x++) {
+				currentColour = " "
 
-				if (mode == 2) {
-					currentColour = "#"
-				}
+				if ((x ":" y) in map) {
+					mode = map[x ":" y]
+					if (mode == 1) {
+						currentColour = "1"
+					}
 
-				if (mode == 3) {
-					currentColour = "-"
-				}
+					if (mode == 2) {
+						currentColour = "#"
+					}
+
+					if (mode == 3) {
+						currentColour = "_"
+					}
 
 
-				if (mode == 4) {
-					currentColour = "O"
-				}
-			}			
+					if (mode == 4) {
+						currentColour = "O"
+					}
+				}			
 
-			buffer = buffer "" currentColour
+				buffer = buffer "" currentColour
+			}
+
+			buffer = buffer "\n"
 		}
 
-		buffer = buffer "\n"
+		print "\033[2J"
+		print buffer
 	}
 
-	print "\033[2J"
-	print buffer
-	sleep("0.01")
+	sleep("0.001")
 }
