@@ -10,7 +10,7 @@ END {
 }
 
 function part1(pData) {
-	drawTiles(screen, pData)
+	playGame(screen, pData)
 
 	for(i in screen) {
 		if (screen[i] == 2) {
@@ -19,17 +19,15 @@ function part1(pData) {
 	}
 
 	printf "Block count: %d\n", blockCount
-
-	printMap(screen)
 }
 
 function part2(pData) {
 	pData[0] = 2
-	drawTiles(screen, pData)
-	printf "score: %d", screen["-1:0"]
+	playGame(screen, pData)
+	printf "score: %d\n", screen["-1:0"]
 }
 
-function drawTiles(screen, intCodeInstruction,		intOptions, intVariables, intState) {
+function playGame(screen, intCodeInstruction,		intOptions, intVariables, intState) {
 
 	intOptions["return-on-print"] = 1
 
