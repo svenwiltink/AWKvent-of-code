@@ -2,8 +2,13 @@
 
 END {
 	copyArray(pdata, part1Data)
+	copyArray(pdata, part2Data)
 
 	part1(part1Data)
+	#part2(part2Data)
+
+	
+	#printMap(screen, xMin, xMax, yMin, yMax)
 }
 
 function part1(pData) {
@@ -16,6 +21,13 @@ function part1(pData) {
 	}
 
 	printf "Block count: %d\n", blockCount
+
+	printMap(screen)
+}
+
+function part2(pData) {
+	pData[0] = 2
+	#drawTiles(screen, pData)
 }
 
 function drawTiles(screen, intCodeInstruction,		intOptions, intVariables, intState) {
@@ -31,6 +43,9 @@ function drawTiles(screen, intCodeInstruction,		intOptions, intVariables, intSta
 		x = startIntCode(intCodeInstruction, intOptions, intVariables, intState)
 		y = startIntCode(intCodeInstruction, intOptions, intVariables, intState)
 
+		x = int(x)
+		y = int(y)
+
 		mode = startIntCode(intCodeInstruction, intOptions, intVariables, intState)
 
 		screen[x ":" y] = mode
@@ -38,20 +53,35 @@ function drawTiles(screen, intCodeInstruction,		intOptions, intVariables, intSta
 		xMin = x < xMin ? x : xMin
 		xMax = x > xMax ? x : xMax
 
-		yMin = y < xMin ? y : xMin
-		yMax = y > xMax ? y : xMax
+		yMin = y < yMin ? y : yMin
+		yMax = y > yMax ? y : yMax
 	}
-
-	printMap(screen, xMin, xMax, yMin, yMax)
 }
 
-function printMap(map, xMin, xMax, yMin, yMax,		x, y, currentColour) {
-	for (y=yMax; y>=yMin-1; y--) {
+function printMap(map, 	x, y, currentColour) {
+	printf "\033[2J"
+	for (y=yMin; y<=yMax; y++) {
 		for (x=xMin; x<=xMax;x++) {
-			currentColour = "."
+			currentColour = " "
 
 			if ((x ":" y) in map) {
-				currentColour = map[x ":" y]
+				mode = map[x ":" y]
+				if (mode == 1) {
+					currentColour = "1"
+				}
+
+				if (mode == 2) {
+					currentColour = "#"
+				}
+
+				if (mode == 3) {
+					currentColour = "-"
+				}
+
+
+				if (mode == 4) {
+					currentColour = "O"
+				}
 			}			
 
 			printf currentColour
