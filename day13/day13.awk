@@ -5,10 +5,8 @@ END {
 	copyArray(pdata, part2Data)
 
 	part1(part1Data)
-	#part2(part2Data)
+	part2(part2Data)
 
-	
-	#printMap(screen, xMin, xMax, yMin, yMax)
 }
 
 function part1(pData) {
@@ -27,7 +25,8 @@ function part1(pData) {
 
 function part2(pData) {
 	pData[0] = 2
-	#drawTiles(screen, pData)
+	drawTiles(screen, pData)
+	printf "score: %d", screen["-1:0"]
 }
 
 function drawTiles(screen, intCodeInstruction,		intOptions, intVariables, intState) {
@@ -59,7 +58,6 @@ function drawTiles(screen, intCodeInstruction,		intOptions, intVariables, intSta
 }
 
 function printMap(map, 	x, y, currentColour) {
-	printf "\033[2J"
 	for (y=yMin; y<=yMax; y++) {
 		for (x=xMin; x<=xMax;x++) {
 			currentColour = " "
