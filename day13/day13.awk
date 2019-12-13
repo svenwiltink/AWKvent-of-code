@@ -38,14 +38,36 @@ function drawTiles(screen, intCodeInstruction,		intOptions, intVariables, intSta
 	yMin = 0
 	yMax = 0
 
+	ballX = 0
+	paddleX = 0
+
 	while (intState["HALT"] != 1) {
+		intVariables[0] = 0
+
+		if (paddleX < ballX) {
+			intVariables[0] = 1
+		}
+
+		if (paddleX > ballX) {
+			intVariables[0] = -1
+		}
+
 		x = startIntCode(intCodeInstruction, intOptions, intVariables, intState)
 		y = startIntCode(intCodeInstruction, intOptions, intVariables, intState)
 
 		x = int(x)
 		y = int(y)
 
+
 		mode = startIntCode(intCodeInstruction, intOptions, intVariables, intState)
+
+		if (mode == 4) {
+			ballX = x
+		}
+
+		if (mode == 3) {
+			paddleX = x
+		}
 
 		screen[x ":" y] = mode
 
