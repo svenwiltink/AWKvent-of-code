@@ -1,4 +1,5 @@
 @include "intcode.awk"
+@load "time"
 
 END {
 	copyArray(pdata, part1Data)
@@ -74,10 +75,13 @@ function playGame(screen, intCodeInstruction,		intOptions, intVariables, intStat
 
 		yMin = y < yMin ? y : yMin
 		yMax = y > yMax ? y : yMax
+
+		if (shouldPrint) printMap(screen)
 	}
 }
 
 function printMap(map, 	x, y, currentColour) {
+	buffer = "Score: " map["-1:0"] " \n\n"
 	for (y=yMin; y<=yMax; y++) {
 		for (x=xMin; x<=xMax;x++) {
 			currentColour = " "
@@ -102,9 +106,13 @@ function printMap(map, 	x, y, currentColour) {
 				}
 			}			
 
-			printf currentColour
+			buffer = buffer "" currentColour
 		}
 
-		print ""
+		buffer = buffer "\n"
 	}
+
+	print "\033[2J"
+	print buffer
+	sleep("0.01")
 }
