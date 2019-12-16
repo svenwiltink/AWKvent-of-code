@@ -12,9 +12,68 @@ BEGIN {
 }
 
 END {
-	oreRequired = getIngredients("1 FUEL")
+	part1()
+	part2()
+}
 
+function part1() {
+	oreRequired = getIngredients("1 FUEL", part1Inventory)
 	print oreRequired " Ore required"
+}
+
+function part2() {
+	maxOres = 13312
+
+
+	max = 1000000000000
+
+
+	fuelCreated = 1
+
+	while(1) {
+		previous = fuelCreated
+		cleanArray(part2Inventory)
+		
+		oreRequired = getIngredients(fuelCreated" FUEL", part2Inventory)
+		if (debug) printf "fuel: %d, ore %d\n", fuelCreated, oreRequired
+
+		# determine upper bounds
+		if (!reachedCap && oreRequired < max) {
+			if (debug) print "not reached max, doubling cap"
+			fuelCreated = fuelCreated * 2
+			continue
+		}
+
+		# overshot. set upper bounds to current
+		if (oreRequired > max) {
+			reachedCap = 1
+			upperBounds = fuelCreated
+			if (debug) print "adjusting upper bounds to " upperBounds
+		}
+
+		# undershot, set lower bounds to current
+		if (oreRequired < max) {
+			lowerBounds = fuelCreated
+			if (debug) print "adjusting lower bounds to " lowerBounds
+		}
+
+		if (debug) printf "%d %d\n", upperBounds, lowerBounds
+
+		fuelCreated = int((upperBounds + lowerBounds) / 2)
+
+		if (previous == fuelCreated) {
+			break
+		}
+
+	}
+
+	printf "Max amounf of Fuel: %d\n", fuelCreated
+}
+
+function cleanArray(array) {
+	for (i in array) {
+		delete array[i]
+	}
 }
 
 function getIngredients(targetIngredient, inventory, ident,		targetIngredientInfo, targetItem, timesNeeded, newTargets, newTarget, newOre, oreRequired, remainder) {
