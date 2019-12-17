@@ -96,9 +96,15 @@ function findPath(intCodeInstruction, map) {
 
 	x = 0
 	y = 0
-	while (1) {
 
+	stepsToOxygenStation = 0
+	foundOxygen = 0
+	minutes = 0
+	while (1) {
+		statusRun = 0
 		for (stateNr in states) {
+			statusRun++
+
 			stringToState(states[stateNr], intCodeInstruction, intState)
 			x = intState["xCoord"]
 			y = intState["yCoord"]
@@ -154,9 +160,10 @@ function findPath(intCodeInstruction, map) {
 				testState["steps"]++
 				
 				if (result == 1) {
+					if (found)
 					printf "%d %d is AIR, can traverse\n", newX, newY
 					if (!alreadySavedState) {
-						printf "Updating current state"
+						printf "Updating current state\n"
 						states[stateNr] = stateToString(testInstructions, testState)
 						alreadySavedState = 1
 					} else {
@@ -166,12 +173,37 @@ function findPath(intCodeInstruction, map) {
 					}
 				}
 
-				if (result == 2) {
-					printf "FUCK YEAH, we are done. Took %d steps\n", testState["steps"]
-					exit
+				# only care about the oxygen station once
+				if (foundOxygen == 0 && result == 2) {
+					stepsToOxygenStation = testState["steps"]
+					foundOxygen = 1
+					
+					print "Found oxygen station. Resetting state"
+
+					# we have found the oxygen station. This is now the _only_ valid state.
+					# delete the other states so we can reset our search
+
+					for (i in states) {
+						delete states[i]
+					}
+
+					for (i in map) {
+						delete map[i]
+					}
+
+					states[0] = stateToString(testInstructions, testState)
+					stateCount = 1
+					breakStateLoop = 1
+					break
 				}
 
 				deadEnd = 0
+			}
+
+
+			if (breakStateLoop) {
+				breakStateLoop = 0
+				break
 			}
 
 			if (deadEnd) {
@@ -180,8 +212,25 @@ function findPath(intCodeInstruction, map) {
 			}
 		}
 
+		if (statusRun == 0) {
+			print "no more states to execute, exiting"
+			break
+		}
+
+		if (foundOxygen) {
+			minutes++
+		}
+
 		printMap(map, x, y)
+
 	}
+
+	# substract 2 because we count the step where we find the oxygen station
+	# and when we find the last dead end
+	minutes -= 2
+
+	printf "%d steps to oxygen station\n", stepsToOxygenStation
+	printf "%d minutes to fill up the haul\n", minutes
 }
 
 
