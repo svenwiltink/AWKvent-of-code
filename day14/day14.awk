@@ -22,11 +22,8 @@ function part1() {
 }
 
 function part2() {
-	maxOres = 13312
-
 
 	max = 1000000000000
-
 
 	fuelCreated = 1
 
