@@ -17,6 +17,10 @@ function resetIntCode(pState) {
 }
 
 function copyArray(source, target, 		i) {
+	for (i in target) {
+		delete target[i]
+	}
+	
 	for (i in source) {
 		target[i] = source[i]
 	}

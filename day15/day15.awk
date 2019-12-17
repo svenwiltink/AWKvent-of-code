@@ -13,8 +13,14 @@ function part1() {
 # stateString = key:value:key:value
 # instructions = comma separated ints
 function stateToString(instructions, state, 		buffer, i, first) {
+	first = 1
 	for (key in state) {
-		buffer = buffer key ":" state[key]
+		if (first) {
+			buffer = buffer key ":" state[key]
+			first = 0
+		} else {
+			buffer = buffer ":" key ":" state[key]
+		}
 	}
 
 	buffer = buffer "|"
@@ -70,10 +76,6 @@ function findPath(intCodeInstruction, map) {
 	# 2 down
 	# 3 left
 	# 4 right
-	direction = 4
-
-	x = 0
-	y = 0
 
 	xMin = 0
 	xMax = 0
@@ -82,60 +84,100 @@ function findPath(intCodeInstruction, map) {
 
 	map["0:0"] = 1
 
+	# abuse the state of the intcode machine to store data we want to save 
+	# alongside the intcode instructions
+
+	testState["xCoord"] = 0
+	testState["yCoord"] = 0
+	testState["steps"] = 0
 
 	stateCount = 0
-	savedState =  stateToString(intCodeInstruction, testState)
-	stringToState(savedState, newInstructions, newState)
-	newSavedState =  stateToString(newInstructions, newState)
+	states[stateCount] = stateToString(intCodeInstruction, testState)
 
-	print savedState "\n\n"
-	print newSavedState
-	states[0] = stateToString(intCodeInstruction, testState)
-
-
+	x = 0
+	y = 0
 	while (1) {
-		# TODO. At each step, check what directions are available by trying to traverse them. If traversing the path was successful, move back. If multiple directions are available we have to start Breath First Search by adding the directions to the list of statemachines to execute
 
-		for (newDirection=1; newDirection <=4; newDirection++) {
-			newX = x
-			newY = y
+		for (stateNr in states) {
+			stringToState(states[stateNr], intCodeInstruction, intState)
+			x = intState["xCoord"]
+			y = intState["yCoord"]
 
-			if (newDirection == 1) {
-				newY++
+			# TODO. At each step, check what directions are available by trying to traverse them. If traversing the path was successful, move back. If multiple directions are available we have to start Breath First Search by adding the directions to the list of statemachines to execute
+
+			alreadySavedState = 0
+			deadEnd = 1
+			for (newDirection=1; newDirection <=4; newDirection++) {
+				newX = x
+				newY = y
+
+				if (newDirection == 1) {
+					newY++
+				}
+
+				if (newDirection == 2) {
+					newY--
+				}
+
+				if (newDirection == 3) {
+					newX--
+				}
+
+				if (newDirection == 4) {
+					newX++
+				}
+
+				if (newX ":" newY in map) {
+					printf "Already mapped %d %d, skipping\n", newX, newY
+					continue
+				}
+
+				copyArray(intCodeInstruction, testInstructions)
+				copyArray(intState, testState)
+
+				intVariables[0] = newDirection
+
+				result = startIntCode(testInstructions, intOptions, intVariables, testState)
+
+				printf "%d %d would be %d. Using direction %d\n", newX, newY, result, newDirection
+
+				map[newX ":" newY] = result
+
+				xMin = newX < xMin ? newX : xMin
+				xMax = newX > xMax ? newX : xMax
+
+				yMin = newY < yMin ? newY : yMin
+				yMax = newY > yMax ? newY : yMax
+
+				testState["xCoord"] = newX
+				testState["yCoord"] = newY
+				testState["steps"]++
+				
+				if (result == 1) {
+					printf "%d %d is AIR, can traverse\n", newX, newY
+					if (!alreadySavedState) {
+						printf "Updating current state"
+						states[stateNr] = stateToString(testInstructions, testState)
+						alreadySavedState = 1
+					} else {
+						printf "Adding new state"
+						stateCount++
+						states[stateCount] = stateToString(testInstructions, testState)
+					}
+				}
+
+				if (result == 2) {
+					printf "FUCK YEAH, we are done. Took %d steps\n", testState["steps"]
+					exit
+				}
+
+				deadEnd = 0
 			}
 
-			if (newDirection == 2) {
-				newY--
+			if (deadEnd) {
+				print "Dead end. removing state"
+				delete states[stateNr]
 			}
-
-			if (newDirection == 3) {
-				newX--
-			}
-
-			if (newDirection == 4) {
-				newX++
-			}
-
-			if (newX ":" newY in map) {
-				printf "Already mapped %d %d, skipping\n", newX, newY
-			}
-
-			copyArray(intCodeInstruction, testInstructions)
-			copyArray(intState, testState)
-
-			intVariables[0] = newDirection
-
-			result = startIntCode(testInstructions, intOptions, intVariables, testState)
-
-			printf "%d %d would be %d. Using direction %d\n", newX, newY, result, newDirection
-
-			map[newX ":" newY] = result
-
-			xMin = blockX < xMin ? blockX : xMin
-			xMax = blockX > xMax ? blockX : xMax
-
-			yMin = blockY < yMin ? blockY : yMin
-			yMax = blockY > yMax ? blockY : yMax
 		}
 
 		printMap(map, x, y)
@@ -175,8 +217,8 @@ function printMap(map, rX, rY,		x, y, currentTile) {
 			buffer = buffer "\n"
 		}
 
-		#print "\033[2J"
-		print "\n\n\n"
+		print "\033[2J"
+		#print "\n\n\n"
 		print buffer
 	
 }
