@@ -20,8 +20,8 @@ calculateMass([], 0).
 calculateMass([H|T], Mass):-
     number_string(Hn, H),
     Hm is floor(Hn/3) - 2,
-    Mass = Hm + N,
-    calculateMass(T, N).
+    calculateMass(T, N),
+    Mass is Hm + N.
 
 :-
     readInput(Input),
