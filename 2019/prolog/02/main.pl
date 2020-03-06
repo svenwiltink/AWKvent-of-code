@@ -21,9 +21,7 @@ readData(Stream, Input, Index):-
         put_assoc(Index, Tail, N, Input)
     ).
 
-runIntCode(IntCode, PC, 1):-
-    
-    format("running opcode ~d\n", 1),
+runIntCode(IntCode, PC, Output, 1):-
 
     L1 is PC + 1,
     L2 is PC + 2,
@@ -41,11 +39,9 @@ runIntCode(IntCode, PC, 1):-
 
     put_assoc(Pos3, IntCode, Number, NewIntCode),
 
-    runIntCode(NewIntCode, PCn).
+    runIntCode(NewIntCode, PCn, Output).
 
-runIntCode(IntCode, PC, 2):-
-    
-    format("running opcode ~d\n", 2),
+runIntCode(IntCode, PC, Output, 2):-
     
     L1 is PC + 1,
     L2 is PC + 2,
@@ -63,19 +59,32 @@ runIntCode(IntCode, PC, 2):-
 
     put_assoc(Pos3, IntCode, Number, NewIntCode),
 
-    runIntCode(NewIntCode, PCn).
+    runIntCode(NewIntCode, PCn, Output).
 
-runIntCode(IntCode, _, 99):-
+runIntCode(IntCode, _, Output, 99):-
     get_assoc(0, IntCode, Value),
-    format("Found value ~d", Value).
+    Output is Value.
 
-runIntCode(IntCode, PC):-
+runIntCode(IntCode, PC, Output):-
     get_assoc(PC, IntCode, OpCode),
-    format("Found opcode ~d\n", OpCode),
-    runIntCode(IntCode, PC, OpCode).
+    runIntCode(IntCode, PC, Output, OpCode).
     
+runIntCodeWithReplacement(A, B, IntCode, Value):-
+    put_assoc(1, IntCode, A, IntCode2),
+    put_assoc(2, IntCode2, B, IntCode3),
+    runIntCode(IntCode3, 0, Output),
+    Value is Output.
+
 :-
     readIntcode(IntCode),
-    put_assoc(1, IntCode, 12, IntCode2),
-    put_assoc(2, IntCode2, 1, IntCode3),
-    runIntCode(IntCode3, 0).
+    runIntCodeWithReplacement(12, 1, IntCode, Output),
+    format("Part 1: ~d\n", Output).
+
+:-
+    readIntcode(IntCode),
+    between(0, 100, A),
+    between(0, 100, B),
+    runIntCodeWithReplacement(A, B, IntCode, 19690720),
+
+    format("Part 2: ~d~d\n", [A, B]),
+    halt.
