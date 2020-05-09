@@ -1,7 +1,4 @@
 #! /usr/bin/env swipl
-
-:- use_module(library(assoc)).
-
 readSeries():-
     assert(coord(0, 0, 0)),
     setup_call_cleanup(
