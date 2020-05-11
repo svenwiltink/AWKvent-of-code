@@ -22,18 +22,14 @@ readData(Stream, Input, Index):-
     ).
 
 getParameter(IntCode, Modes, Parameter, Address, Value):-
-%    format("modes ~p parameter ~p\n", [Modes, Parameter]),
     Mode is mod(floor(Modes/10**Parameter), 10),
-%    format("Mode ~p\n", Mode),
     getParameterMode(IntCode, Mode, Address, Value).
 
 % positional mode
 getParameterMode(IntCode, 0, Address, Value):-
-%    format("using positional mode\n"),
     get_assoc(Address, IntCode, Value).
 
 getParameterMode(_, 1, Address, Value):-
-%    format("using immidiate mode\n"),
     Value is Address.
 
 runIntCode(IntCode, PC, Mode, Inputs, Output, 1):-
@@ -100,13 +96,95 @@ runIntCode(IntCode, PC, Mode, Inputs, [N|Output], 4):-
 
     runIntCode(IntCode, PCn, Inputs, Output).
 
+runIntCode(IntCode, PC, Mode, Inputs, Output, 5):-
+    L1 is PC + 1,
+    L2 is PC + 2,
+
+    get_assoc(L1, IntCode, Pos1),
+    get_assoc(L2, IntCode, Pos2),
+
+    getParameter(IntCode, Mode, 0, Pos1, N1),
+    getParameter(IntCode, Mode, 1, Pos2, N2),
+
+    (N1 > 0
+    -> PCn is N2
+    ; PCn is PC + 3
+    ),
+
+    runIntCode(IntCode, PCn, Inputs, Output).
+
+runIntCode(IntCode, PC, Mode, Inputs, Output, 6):-
+
+    L1 is PC + 1,
+    L2 is PC + 2,
+
+    get_assoc(L1, IntCode, Pos1),
+    get_assoc(L2, IntCode, Pos2),
+
+    getParameter(IntCode, Mode, 0, Pos1, N1),
+    getParameter(IntCode, Mode, 1, Pos2, N2),
+
+    (N1 = 0
+    -> PCn is N2
+    ; PCn is PC + 3
+    ),
+
+    runIntCode(IntCode, PCn, Inputs, Output).
+
+runIntCode(IntCode, PC, Mode, Inputs, Output, 7):-
+
+    L1 is PC + 1,
+    L2 is PC + 2,
+    L3 is PC + 3,
+
+    get_assoc(L1, IntCode, Pos1),
+    get_assoc(L2, IntCode, Pos2),
+    get_assoc(L3, IntCode, Pos3),
+
+    getParameter(IntCode, Mode, 0, Pos1, N1),
+    getParameter(IntCode, Mode, 1, Pos2, N2),
+
+    (N1 < N2
+    -> Number is 1
+    ; Number is 0
+    ),
+
+    PCn is PC + 4,
+
+    put_assoc(Pos3, IntCode, Number, NewIntCode),
+
+    runIntCode(NewIntCode, PCn, Inputs, Output).
+
+runIntCode(IntCode, PC, Mode, Inputs, Output, 8):-
+
+    L1 is PC + 1,
+    L2 is PC + 2,
+    L3 is PC + 3,
+
+    get_assoc(L1, IntCode, Pos1),
+    get_assoc(L2, IntCode, Pos2),
+    get_assoc(L3, IntCode, Pos3),
+
+    getParameter(IntCode, Mode, 0, Pos1, N1),
+    getParameter(IntCode, Mode, 1, Pos2, N2),
+
+    (N1 = N2
+    -> Number is 1
+    ; Number is 0
+    ),
+
+    PCn is PC + 4,
+
+    put_assoc(Pos3, IntCode, Number, NewIntCode),
+
+    runIntCode(NewIntCode, PCn, Inputs, Output).
+
 runIntCode(_, _, _, _, _, 99).
 
 runIntCode(IntCode, PC, Inputs, Output):-
     get_assoc(PC, IntCode, OpCodeData),
     OpCode is mod(OpCodeData, 100),
     Mode is floor(OpCodeData / 100),
-%    format("Original ~p Opcode ~p Mode ~p\n", [OpCodeData, OpCode, Mode]),
     runIntCode(IntCode, PC, Mode, Inputs, Output, OpCode).
 
 runIntCodeWithReplacement(A, B, IntCode, Inputs, Value):-
@@ -116,6 +194,12 @@ runIntCodeWithReplacement(A, B, IntCode, Inputs, Value):-
     Value is Output.
 
 :-
+    format("Part 1\n"),
     readIntcode(IntCode),
-    runIntCode(IntCode, 0, [1], _),
-    halt
+    runIntCode(IntCode, 0, [1], _).
+
+:-
+    format("Part 2\n"),
+    readIntcode(IntCode),
+    runIntCode(IntCode, 0, [5], _),
+    halt.
