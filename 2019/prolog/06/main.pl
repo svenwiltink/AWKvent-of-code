@@ -32,8 +32,29 @@ find_orbits(Source, Walked, Depth, Orbits):-
 find_orbits(_, _, Depth, Orbits):-
     Orbits is Depth.
 
+
+connected(A, B):-
+    edge(A, B) ; edge(B, A).
+
+% if we are connected the length is 1
+find_route(Source, Destination, _, Length):-
+    connected(Source, Destination),
+    Length is 1.
+
+find_route(Source, Destination, Walked, Length):-
+    connected(Source, H),
+    \+ member(H, Walked),
+    find_route(H, Destination, [H|Walked], NLength),
+    Length is NLength + 1.
+
 :-
     string_codes("COM", S),
     find_orbits(S, [], 0, Orbits),
-    format("Part 1: ~p\n", Orbits),
-    halt.
+    format("Part 1: ~p\n", Orbits).
+
+:-
+    string_codes("YOU", S),
+    string_codes("SAN", D),
+    find_route(S, D, [], L),
+    T is L - 2,
+    format("Part 2: ~p\n", T).
