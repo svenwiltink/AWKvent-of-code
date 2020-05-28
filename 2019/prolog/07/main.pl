@@ -93,7 +93,6 @@ runIntCode(IntCode, PC, Mode, Inputs, [N|Output], NPC, NIntCode, 4):-
     getParameter(IntCode, Mode, 0, Pos1, N1),
 
     N is N1,
-    format("Output: ~p\n", N),
 
     PCn is PC + 2,
 
@@ -201,8 +200,31 @@ runIntCodeWithReplacement(A, B, IntCode, Inputs, Value):-
     runIntCode(IntCode3, 0, Inputs, Output),
     Value is Output.
 
-:-
-    format("Part 1\n"),
+
+runAmps([PhaseA, PhaseB, PhaseC, PhaseD, PhaseE], OutputE):-
     readIntcode(IntCode),
-    runIntCode(IntCode, 0, [3,0], _, NPC, NIntCode),
-    format("End PC ~p\nStart Intcode\n~p End intcode\n~p", [NPC, IntCode, NIntCode]).
+    copy_term(IntCode, AmpA),
+    copy_term(IntCode, AmpB),
+    copy_term(IntCode, AmpC),
+    copy_term(IntCode, AmpD),
+    copy_term(IntCode, AmpE),
+
+    runIntCode(AmpA, 0, [PhaseA,0], [OutputA], _, _),
+    runIntCode(AmpB, 0, [PhaseB,OutputA], [OutputB], _, _),
+    runIntCode(AmpC, 0, [PhaseC,OutputB], [OutputC], _, _),
+    runIntCode(AmpD, 0, [PhaseD,OutputC], [OutputD], _, _),
+    runIntCode(AmpE, 0, [PhaseE,OutputD], [OutputE], _, _).
+
+findBestOutput(BestSetting, BestOutput):-
+    permutation([0,1,2,3,4], BestSetting),
+    runAmps(BestSetting, BestOutput),
+
+    \+ (
+        permutation([0,1,2,3,4], OtherSetting),
+        runAmps(OtherSetting, OtherOutput),
+        OtherOutput > BestOutput
+    ).
+:-
+    findBestOutput(_, Output),
+    format("Part 1 ~p", Output),
+    halt.
