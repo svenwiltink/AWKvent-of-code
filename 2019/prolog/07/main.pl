@@ -94,15 +94,13 @@ runIntCode(IntCode, PC, Mode, Inputs, [N|Output], NPC, NIntCode, NInputs, Halted
 
     N is N1,
 
-%    format("Output ~p\n", N),
-
     PCn is PC + 2,
 
     ( returnOnPrint
         -> (
             NPC is PCn,
             copy_term(IntCode, NIntCode),
-            copy_term(NInputs, Inputs),
+            copy_term(Inputs, NInputs),
             Halted is 0,
             Output = []
             )
