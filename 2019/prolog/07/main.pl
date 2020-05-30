@@ -252,15 +252,11 @@ startFeedbackAmps([PhaseA, PhaseB, PhaseC, PhaseD, PhaseE], Output):-
 
 findBestOutputPart2(BestOutput):-
     permutation([5,6,7,8,9], BestSetting),
-    format("trying permutation ~p ~p ~p ~p ~p\n", BestSetting),
     startFeedbackAmps(BestSetting, [BestOutput]),
-    format("Output ~p\n", [BestOutput]),
 
     \+ (
         permutation([5,6,7,8,9], OtherSetting),
-        format("trying other permutation ~p ~p ~p ~p ~p\n", OtherSetting),
         startFeedbackAmps(OtherSetting, [OtherOutput]),
-        format("Otheroutput ~p\n", [OtherOutput]),
 
         OtherOutput > BestOutput
     ).
@@ -272,20 +268,17 @@ runFeedbackAmps(Amps, LastOutput):-
 
 runFeedbackAmps([amp(N1, C1, P1, I1), amp(N2, C2, P2, I2), A3, A4, A5], Previous, LastOutput):-
     runIntCode(C1, P1, I1, Output, NPC, NIntCode, NInputs, Halted),
-
     (Halted = 1
-    ->  Output = [],
+    ->
         copy_term(Previous, LastOutput)
-    ;   append(I2, Output, NI2),
+    ;
+        append(I2, Output, NI2),
         runFeedbackAmps([amp(N2, C2, P2, NI2), A3, A4, A5, amp(N1, NIntCode, NPC, NInputs)], Output, LastOutput)
     ).
 
-%:-
-%    findBestOutput(_, Output),
-%    format("Part 1 ~p", Output),
-%    halt.
-
 :-
-    debug,
-    findBestOutputPart2(Output),
-    format("Part 2 ~p", Output).
+    findBestOutput(_, Output),
+    format("Part 1 ~p\n", Output),
+    findBestOutputPart2(Output2),
+    format("Part 2 ~p\n", Output2),
+    halt.
