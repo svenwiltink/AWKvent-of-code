@@ -27,6 +27,37 @@ get_lowest_zero_layer(Ls, Best):-
         OtherCount < BestCount
     ).
 
+% when there are no more layers to apply the last output is the
+% final image
+apply_layers([], Output, Output).
+
+apply_layers([layer(_, CurrentLayer)| Rl], LastFrame, Output):-
+    apply_layer(CurrentLayer, LastFrame, NextFrame),
+    apply_layers(Rl, NextFrame, Output).
+
+% If the last frame is empty the current frame is the output
+apply_layer(Output, [], Output).
+
+apply_layer([CurrentPixel|Rp], [LastFramePixel|RLp], [NewPixel|OtherOutput]):-
+    (LastFramePixel = 50
+    ->  NewPixel is CurrentPixel
+    ;   NewPixel is LastFramePixel
+    ),
+    apply_layer(Rp, RLp, OtherOutput).
+
+print_image(_, _, []).
+print_image(Width, Index, [Pixel|Rp]):-
+    NIndex is Index + 1,
+    PrintNewline is mod(Index, Width),
+
+    (Pixel = 49
+    ->  format("1")
+    ;   format(" ")),
+
+    (PrintNewline is 0
+    ->  format("\n")
+    ;   format("")),
+    print_image(Width, NIndex, Rp).
 :-
     char_code("1", Number1),
     char_code("2", Number2),
@@ -39,4 +70,10 @@ get_lowest_zero_layer(Ls, Best):-
 
     Answer is N1 * N2,
 
-    format("part 1: ~p", Answer).
+    format("part 1: ~p\n", Answer).
+
+:-
+    format("Part 2: \n"),
+    phrase_from_file(layers(150, Ls), 'input.txt'),
+    apply_layers(Ls, [], Output),
+    print_image(25, 1, Output).
