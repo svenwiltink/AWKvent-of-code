@@ -21,11 +21,14 @@ readData(Stream, Input, Index):-
         put_assoc(Index, Tail, N, Input)
     ).
 
-runIntCode(IntCode, PC, Output, 1):-
+runIntCode(MachineIn, MachineOut, 1):-
 
+    PC is MachineIn.pc,
     L1 is PC + 1,
     L2 is PC + 2,
     L3 is PC + 3,
+
+    IntCode = MachineIn.intCode,
 
     get_assoc(L1, IntCode, Pos1),
     get_assoc(L2, IntCode, Pos2),
@@ -39,13 +42,18 @@ runIntCode(IntCode, PC, Output, 1):-
 
     put_assoc(Pos3, IntCode, Number, NewIntCode),
 
-    runIntCode(NewIntCode, PCn, Output).
+    NewMachine = MachineIn.put([intCode=NewIntCode, pc=PCn]),
 
-runIntCode(IntCode, PC, Output, 2):-
-    
+    runIntCode(NewMachine, MachineOut).
+
+runIntCode(MachineIn, MachineOut, 2):-
+
+    PC is MachineIn.pc,
     L1 is PC + 1,
     L2 is PC + 2,
     L3 is PC + 3,
+
+    IntCode = MachineIn.intCode,
 
     get_assoc(L1, IntCode, Pos1),
     get_assoc(L2, IntCode, Pos2),
@@ -59,21 +67,26 @@ runIntCode(IntCode, PC, Output, 2):-
 
     put_assoc(Pos3, IntCode, Number, NewIntCode),
 
-    runIntCode(NewIntCode, PCn, Output).
+    NewMachine = MachineIn.put([intCode=NewIntCode, pc=PCn]),
 
-runIntCode(IntCode, _, Output, 99):-
-    get_assoc(0, IntCode, Value),
-    Output is Value.
+    runIntCode(NewMachine, MachineOut).
 
-runIntCode(IntCode, PC, Output):-
-    get_assoc(PC, IntCode, OpCode),
-    runIntCode(IntCode, PC, Output, OpCode).
+runIntCode(MachineIn, MachineOut, 99):-
+    get_assoc(0, MachineIn.intCode, Value),
+    MachineOut = MachineIn.put([output=Value]).
+
+runIntCode(MachineIn, MachineOut):-
+    get_assoc(MachineIn.pc, MachineIn.intCode, OpCode),
+    runIntCode(MachineIn, MachineOut, OpCode).
     
-runIntCodeWithReplacement(A, B, IntCode, Value):-
-    put_assoc(1, IntCode, A, IntCode2),
-    put_assoc(2, IntCode2, B, IntCode3),
-    runIntCode(IntCode3, 0, Output),
-    Value is Output.
+runIntCodeWithReplacement(NumberOne, NumberTwo, IntCode, Value):-
+    put_assoc(1, IntCode, NumberOne, IntCode2),
+    put_assoc(2, IntCode2, NumberTwo, IntCode3),
+
+    Machine = machine{intCode: IntCode3, pc: 0, output: []},
+
+    runIntCode(Machine, MachineOut),
+    Value is MachineOut.output.
 
 :-
     readIntcode(IntCode),
