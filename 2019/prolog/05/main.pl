@@ -29,14 +29,16 @@ getParameter(IntCode, Modes, Parameter, Address, Value):-
 getParameterMode(IntCode, 0, Address, Value):-
     get_assoc(Address, IntCode, Value).
 
+% literal mode
 getParameterMode(_, 1, Address, Value):-
     Value is Address.
 
-runIntCode(IntCode, PC, Mode, Inputs, Output, 1):-
-
+runIntCode(MachineIn, MachineOut, Mode, 1):-
+    PC is MachineIn.pc,
     L1 is PC + 1,
     L2 is PC + 2,
     L3 is PC + 3,
+    IntCode = MachineIn.intCode,
 
     get_assoc(L1, IntCode, Pos1),
     get_assoc(L2, IntCode, Pos2),
@@ -50,13 +52,17 @@ runIntCode(IntCode, PC, Mode, Inputs, Output, 1):-
 
     put_assoc(Pos3, IntCode, Number, NewIntCode),
 
-    runIntCode(NewIntCode, PCn, Inputs, Output).
+    NewMachine = MachineIn.put([intCode=NewIntCode, pc=PCn]),
 
-runIntCode(IntCode, PC, Mode, Inputs, Output, 2):-
+    runIntCode(NewMachine, MachineOut).
 
+runIntCode(MachineIn, MachineOut, Mode, 2):-
+    PC is MachineIn.pc,
     L1 is PC + 1,
     L2 is PC + 2,
     L3 is PC + 3,
+
+    IntCode = MachineIn.intCode,
 
     get_assoc(L1, IntCode, Pos1),
     get_assoc(L2, IntCode, Pos2),
@@ -70,9 +76,15 @@ runIntCode(IntCode, PC, Mode, Inputs, Output, 2):-
 
     put_assoc(Pos3, IntCode, Number, NewIntCode),
 
-    runIntCode(NewIntCode, PCn, Inputs, Output).
+    NewMachine = MachineIn.put([intCode=NewIntCode, pc=PCn]),
 
-runIntCode(IntCode, PC, _, [I|Inputs], Output, 3):-
+    runIntCode(NewMachine, MachineOut).
+
+runIntCode(MachineIn, MachineOut, _, 3):-
+    PC is MachineIn.pc,
+    [I|Inputs] = MachineIn.inputs,
+    IntCode = MachineIn.intCode,
+
     L1 is PC + 1,
 
     get_assoc(L1, IntCode, Pos1),
@@ -81,9 +93,14 @@ runIntCode(IntCode, PC, _, [I|Inputs], Output, 3):-
 
     PCn is PC + 2,
 
-    runIntCode(NewIntCode, PCn, Inputs, Output).
+    NewMachine = MachineIn.put([intCode=NewIntCode, inputs=Inputs, pc=PCn]),
 
-runIntCode(IntCode, PC, Mode, Inputs, [N|Output], 4):-
+    runIntCode(NewMachine, MachineOut).
+
+runIntCode(MachineIn, MachineOut, Mode, 4):-
+    PC is MachineIn.pc,
+    IntCode = MachineIn.intCode,
+
     L1 is PC + 1,
 
     get_assoc(L1, IntCode, Pos1),
@@ -94,9 +111,14 @@ runIntCode(IntCode, PC, Mode, Inputs, [N|Output], 4):-
 
     PCn is PC + 2,
 
-    runIntCode(IntCode, PCn, Inputs, Output).
+    NewMachine = MachineIn.put([pc=PCn, output=N]),
 
-runIntCode(IntCode, PC, Mode, Inputs, Output, 5):-
+    runIntCode(NewMachine, MachineOut).
+
+runIntCode(MachineIn, MachineOut, Mode, 5):-
+    PC is MachineIn.pc,
+    IntCode = MachineIn.intCode,
+
     L1 is PC + 1,
     L2 is PC + 2,
 
@@ -111,9 +133,13 @@ runIntCode(IntCode, PC, Mode, Inputs, Output, 5):-
     ; PCn is PC + 3
     ),
 
-    runIntCode(IntCode, PCn, Inputs, Output).
+    NewMachine = MachineIn.put([pc=PCn]),
 
-runIntCode(IntCode, PC, Mode, Inputs, Output, 6):-
+    runIntCode(NewMachine, MachineOut).
+
+runIntCode(MachineIn, MachineOut, Mode, 6):-
+    PC is MachineIn.pc,
+    IntCode = MachineIn.intCode,
 
     L1 is PC + 1,
     L2 is PC + 2,
@@ -129,9 +155,13 @@ runIntCode(IntCode, PC, Mode, Inputs, Output, 6):-
     ; PCn is PC + 3
     ),
 
-    runIntCode(IntCode, PCn, Inputs, Output).
+    NewMachine = MachineIn.put([pc=PCn]),
 
-runIntCode(IntCode, PC, Mode, Inputs, Output, 7):-
+    runIntCode(NewMachine, MachineOut).
+
+runIntCode(MachineIn, MachineOut, Mode, 7):-
+    PC is MachineIn.pc,
+    IntCode = MachineIn.intCode,
 
     L1 is PC + 1,
     L2 is PC + 2,
@@ -149,13 +179,17 @@ runIntCode(IntCode, PC, Mode, Inputs, Output, 7):-
     ; Number is 0
     ),
 
-    PCn is PC + 4,
-
     put_assoc(Pos3, IntCode, Number, NewIntCode),
 
-    runIntCode(NewIntCode, PCn, Inputs, Output).
+    PCn is PC + 4,
 
-runIntCode(IntCode, PC, Mode, Inputs, Output, 8):-
+    NewMachine = MachineIn.put([pc=PCn, intCode=NewIntCode]),
+
+    runIntCode(NewMachine, MachineOut).
+
+runIntCode(MachineIn, MachineOut, Mode, 8):-
+    PC is MachineIn.pc,
+    IntCode = MachineIn.intCode,
 
     L1 is PC + 1,
     L2 is PC + 2,
@@ -173,33 +207,32 @@ runIntCode(IntCode, PC, Mode, Inputs, Output, 8):-
     ; Number is 0
     ),
 
-    PCn is PC + 4,
-
     put_assoc(Pos3, IntCode, Number, NewIntCode),
 
-    runIntCode(NewIntCode, PCn, Inputs, Output).
+    PCn is PC + 4,
 
-runIntCode(_, _, _, _, _, 99).
+    NewMachine = MachineIn.put([pc=PCn, intCode=NewIntCode]),
 
-runIntCode(IntCode, PC, Inputs, Output):-
-    get_assoc(PC, IntCode, OpCodeData),
+    runIntCode(NewMachine, MachineOut).
+
+runIntCode(MachineIn, MachineOut, _, 99):-
+    MachineOut = MachineIn.put([halted=true]).
+
+runIntCode(MachineIn, MachineOut):-
+    get_assoc(MachineIn.pc, MachineIn.intCode, OpCodeData),
     OpCode is mod(OpCodeData, 100),
     Mode is floor(OpCodeData / 100),
-    runIntCode(IntCode, PC, Mode, Inputs, Output, OpCode).
-
-runIntCodeWithReplacement(A, B, IntCode, Inputs, Value):-
-    put_assoc(1, IntCode, A, IntCode2),
-    put_assoc(2, IntCode2, B, IntCode3),
-    runIntCode(IntCode3, 0, Inputs, Output),
-    Value is Output.
+    runIntCode(MachineIn, MachineOut, Mode, OpCode).
 
 :-
-    format("Part 1\n"),
     readIntcode(IntCode),
-    runIntCode(IntCode, 0, [1], _).
+    Machine = machine{intCode: IntCode, pc: 0, inputs: [1], output: [], halted: false},
+    runIntCode(Machine, MachineOut),
+    format("Part 1: ~p\n", MachineOut.output).
 
 :-
-    format("Part 2\n"),
     readIntcode(IntCode),
-    runIntCode(IntCode, 0, [5], _),
+    Machine = machine{intCode: IntCode, pc: 0, inputs: [5], output: [], halted: false},
+    runIntCode(Machine, MachineOut),
+    format("Part 2: ~p\n", MachineOut.output),
     halt.
