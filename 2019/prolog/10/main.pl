@@ -48,12 +48,11 @@ findBest([l(X, Y, C)|Rs], l(Cbx, Cby, Cbc), Best):-
     ),
     findBest(Rs, l(Nx, Ny, Nc), Best).
 
-findBest([l(X, Y, C)|[]], l(Cbx, Cby, Cbc), Best):-
+findBest([l(X, Y, C)|[]], l(Cbx, Cby, Cbc), l(Nx, Ny, Nc)):-
         (C > Cbc
             ->  Nx is X,   Ny is Y,   Nc is C
             ;   Nx is Cbx, Ny is Cby, Nc is Cbc
-        ),
-        Best = l(Nx, Ny, Nc).
+        ).
 
 :-
     findall(l(X, Y, C), losCount(X, Y, C), B),
