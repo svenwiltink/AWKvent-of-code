@@ -1,6 +1,4 @@
 
-import Data.List.Split
-
 validPassword :: String -> Bool
 validPassword x = do
     let parts = words x
