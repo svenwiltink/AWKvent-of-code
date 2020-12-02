@@ -18,21 +18,41 @@ countChar([C], C, 1).
 countChar([_], _, 0).
 countChar([], _, 0).
 
-validPassword((Low, High, Char, Pass), 1):-
+validPasswordOne((Low, High, Char, Pass), 1):-
   countChar(Pass, Char, Count),
   Count >= Low,
   Count =< High.
 
-validPassword(_, 0).
+validPasswordOne(_, 0).
 
-validPasswords([P|Ps], C):-
-  validPassword(P, V),
-  validPasswords(Ps, Vo),
+validPasswordsOne([P|Ps], C):-
+  validPasswordOne(P, V),
+  validPasswordsOne(Ps, Vo),
   C is V + Vo.
 
-validPasswords([], 0).
+validPasswordsOne([], 0).
+
+validPasswordTwo((Low, High, Char, Pass), 1):-
+   nth1(Low, Pass, Char),
+   \+ nth1(High, Pass, Char).
+
+validPasswordTwo((Low, High, Char, Pass), 1):-
+   \+ nth1(Low, Pass, Char),
+   nth1(High, Pass, Char).
+
+validPasswordTwo(_, 0).
+
+validPasswordsTwo([P|Ps], C):-
+  validPasswordTwo(P, V),
+  validPasswordsTwo(Ps, Vo),
+  C is V + Vo.
+
+validPasswordsTwo([], 0).
+
 :-
   phrase_from_file(lines(Passwords), 'input.txt'),
-  validPasswords(Passwords, Count),
+  validPasswordsOne(Passwords, Count),
   format("~d\n", Count),
+  validPasswordsTwo(Passwords, Count2),
+  format("~d\n", Count2),
   halt.
