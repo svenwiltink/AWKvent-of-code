@@ -19,5 +19,5 @@ validPassword2 x = do
 
 main = do
     content <- readFile "input.txt"
-    print $ length $ [x | x <- lines content, validPassword x]
-    print $ length $ [x | x <- lines content, validPassword2 x]
+    print $ length $ filter validPassword $ lines content
+    print $ length $ filter validPassword2 $ lines content
