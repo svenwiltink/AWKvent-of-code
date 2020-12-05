@@ -17,7 +17,12 @@ find (d:dr) x
     where half = length x `div` 2
 
 isMissingSeat :: Int -> Int -> [Int] -> Bool
-isMissingSeat row column  seats = seatID `notElem` seats && seatID - 1 `elem` seats && seatID + 1 `elem` seats where seatID = row * 8 + column
+isMissingSeat row column seats = 
+    seatID `notElem` seats &&
+    seatID - 1 `elem` seats &&
+    seatID + 1 `elem` seats
+    where seatID = row * 8 + column
+
 main = do
     content <- readFile "input.txt"
     let seatIDs = map getSeatID $ lines content
