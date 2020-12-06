@@ -8,14 +8,7 @@ answers x = answer : remaining
             remaining = answers (drop (length (takeWhile (/= "") x) + 1) x)
 
 sameAnswer :: [String] -> Int
-sameAnswer [first] = length $ nub first
-sameAnswer x = length $ intersectMultiple $ map HashSet.fromList x 
-        
-intersectMultiple :: [HashSet.HashSet Char] -> HashSet.HashSet Char
-intersectMultiple [x] = x
-intersectMultiple [x,t] = HashSet.intersection x t
-intersectMultiple (x:tail) = HashSet.intersection x remaining
-    where remaining = intersectMultiple tail
+sameAnswer x = length $ foldl1 HashSet.intersection (map HashSet.fromList x)
 
 main = do
     content <- readFile "input.txt"
