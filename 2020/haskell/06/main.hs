@@ -5,7 +5,7 @@ answers :: [String] -> [[String]]
 answers [] = []
 answers x = answer : remaining
     where   answer = takeWhile (/= "") x
-            remaining = answers (drop (length (takeWhile (/= "") x) + 1) x)
+            remaining = answers $ drop (length answer + 1) x
 
 sameAnswer :: [String] -> Int
 sameAnswer x = length $ foldl1 HashSet.intersection (map HashSet.fromList x)
