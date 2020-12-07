@@ -1,6 +1,12 @@
 import Data.List.Split
 import qualified Data.HashMap.Strict as HashMap
 
+
+data Bag = Bag {
+    colour :: String,
+    contents :: [(Int, String)]
+}
+
 parseBag :: [String] -> (Int, String)
 parseBag x = (amount, content)
     where   amount = read $ head x :: Int
@@ -22,7 +28,19 @@ validPath item baggage children  = directPath || indirectpath
     where   directPath = any (\(_, name) -> name == item) children
             indirectpath = any (\(_, name) -> validPath item baggage (HashMap.lookupDefault [] name baggage)) children
 
+
+totalWeight :: String -> HashMap.HashMap String [(Int, String)] -> Int
+totalWeight item baggage = 1 + c
+    where   children  = HashMap.lookupDefault [] item baggage
+            c = weightChildren children baggage
+
+weightChildren :: [(Int, String)] -> HashMap.HashMap String [(Int, String)] -> Int
+weightChildren [] _ = 0
+weightChildren x baggage = childWeight 
+    where  childWeight = foldl (\acc (amount, name) -> acc + (amount * totalWeight name baggage)) 0 x
+
 main = do
     content <- readFile "input.txt"
     let baggage = HashMap.fromList $ map parse $ lines content
-    print$ length $ HashMap.keys $ HashMap.filter (validPath "shiny gold" baggage) baggage
+    print $ length $ HashMap.keys $ HashMap.filter (validPath "shiny gold" baggage) baggage
+    print $ totalWeight "shiny gold" baggage - 1
