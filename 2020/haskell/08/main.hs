@@ -67,9 +67,10 @@ signedInt i = read i :: Int
 
 findCorrectReplacement :: Machine -> Machine
 findCorrectReplacement m = snd $ head matching
-    where   machines = zip (repeat m) [0 .. (length (instructions m) -1)]
-            results = map (uncurry tryReplacement) machines
-            matching = filter fst results
+  where
+    machines = zip (repeat m) [0 .. (length (instructions m) -1)]
+    results = map (uncurry tryReplacement) machines
+    matching = filter fst results
 
 tryReplacement :: Machine -> Int -> (Bool, Machine)
 tryReplacement m inst
