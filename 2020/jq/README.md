@@ -1,0 +1,1 @@
+Not sure why this even exist. Invoke the with `jq -s -f <dayxx.jq> input.txt`
