@@ -1,0 +1,1 @@
+[. as $input | to_entries[]|select(.value > $input[.key - 1])] | length
