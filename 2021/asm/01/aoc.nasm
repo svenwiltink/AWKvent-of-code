@@ -112,27 +112,29 @@ _start:
 ; rsi - count
 ; rdi - previous number
 .process_numbers:
+    push r14                            ; preserve number of entries
+
     xor rsi, rsi
     mov rax, 8                          ; start calculating the start of the stack. Each entry is 64 bit
     mul r14                             ; there are r14 entries
     add rax, rsp                        ; rax is now the upper bounds of the stack
 
-    mov rcx, rsp                        ; start with the lower bound of the stack
+    mov rcx, rax                        ; start with the upper bound of the stack
 
     mov rdi, [rcx]                      ; set rdi to first number
-    add rcx, 8                          ; increment rdi by 64 bits. Skipping the first number
+    sub rcx, 8                          ; increment rdi by 64 bits. Skipping the first number
 
 .get_number_a:
     mov rdx, [rcx]                      ; get current number
 
-    cmp rdi, rdx                        ; compare to previous number
-    jle .increment_number               ; don't increment counter if less or equal
+    cmp rdx, rdi                        ; compare to previous number
+    jl .increment_number                ; don't increment counter if less or equal
     inc rsi
     
 .increment_number:
     mov rdi, rdx                        ;
-    add rcx, 8                          ; increment with 64 bits
-    cmp rcx, rax                        ; check if upperbound met
+    sub rcx, 8                          ; increment with 64 bits
+    cmp rcx, rsp                        ; check if lower met
     jne .get_number_a                   ; we are not done yet. try again
 
 .processing_done:
@@ -160,6 +162,16 @@ _start:
     mov rdx, r14                        ; the length of the msg
     syscall
 
+; rax - upper bounds
+; rcx - index
+; rdx - value
+; rsi - count
+; rdi - previous sum
+.part2:
+    pop r14                             ; get number of entries from stack
+
+
+    xor rsi, rsi                        ; start solution with 0 
     jmp .ok
 
 
