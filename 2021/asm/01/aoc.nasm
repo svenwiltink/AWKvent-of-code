@@ -122,7 +122,7 @@ _start:
     mov rcx, rax                        ; start with the upper bound of the stack
 
     mov rdi, [rcx]                      ; set rdi to first number
-    sub rcx, 8                          ; increment rdi by 64 bits. Skipping the first number
+    sub rcx, 8                          ; decrement rcx by 64 bits. Skipping the first number
 
 .get_number_a:
     mov rdx, [rcx]                      ; get current number
@@ -132,16 +132,16 @@ _start:
     inc rsi
     
 .increment_number:
-    mov rdi, rdx                        ;
-    sub rcx, 8                          ; increment with 64 bits
+    mov rdi, rdx                        ; store current number as 'previous'
+    sub rcx, 8                          ; decrement index  with 64 bits
     cmp rcx, rsp                        ; check if lower met
     jne .get_number_a                   ; we are not done yet. try again
 
 .processing_done:
-    mov rax, rsi                        ; store answer in rax value
+    mov rax, rsi                        ; store answer in rax register
 
 .part1_answer:
-    mov r15, rax
+    mov r15, rax                        ; preserve answer
     
     call intlen                         ; calculate length of string when displayed on screen
 
