@@ -62,28 +62,28 @@ _start:
     add [bufferSize], rax               ; increase filled buffer size by the amount of bytes read
 
     cmp qword[bufferSize], 0            ; check if EOF. buffer contained no data and nothing was read
-    je .process_numbers                 ; start processing
+    je .process_numbers                 ; start processing  
+
 
 .find_number:
+    mov r15, 0                          ; set index to zero
 ; find index of newline
-    mov rax, 0                          ; set index to zero
     
  .find_newline:   
-    cmp byte [buffer + rax], 10         ; check if newline
+    cmp byte [buffer + r15], 10         ; check if newline
     je .newline_found                   ; newline found
-    inc rax
+    inc r15
 
-    cmp rax, [bufferSize]               ; check if end of buffer 
-    je .process_numbers                 ; no newline found, must have reached end of file
+    cmp r15, [bufferSize]               ; check if end of buffer 
+    je .shift_buffer                    ; no newline found, backfill buffer
 
     jmp .find_newline                   ; no newline found yet. try the rest of the buffer
 
 .newline_found:
-    sub [bufferSize], rax               ; minus what we've read already
+    sub [bufferSize], r15               ; minus what we've read already
     sub qword [bufferSize], 1           ; off by one
-    mov r15, rax                        ; preserve length of string read
 
-    mov rdi, rax                        ; length of the string
+    mov rdi, r15                        ; length of the string
     mov rax, buffer                     ; string in the buffer
     call atoi                           ; convert to int
 
@@ -103,6 +103,9 @@ _start:
     sub rcx, 1                          ; offset by two to account for off-by one
     rep movsb                           ; keep moving data
 
+    cmp r15, [bufferSize]               
+    jl .find_newline
+    
     jmp .fill_buffer                    ; this number is done. Fill the buffer and try it all again.
 
 
