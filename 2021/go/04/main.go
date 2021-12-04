@@ -19,6 +19,7 @@ func (b *BingoCard) PlayNumber(num int) {
 		for j := 0; j < 5; j++ {
 			if b.Score[i][j].Number == num {
 				b.Score[i][j].Hit = true
+				return
 			}
 		}
 	}
@@ -43,15 +44,15 @@ func (b *BingoCard) HasWon() bool {
 
 func (b *BingoCard) checkRows() bool {
 	for i := 0; i < 5; i++ {
-		columnwon := true
+		rowwon := true
 		for j := 0; j < 5; j++ {
 			if b.Score[i][j].Hit == false {
-				columnwon = false
+				rowwon = false
 				break
 			}
 		}
 
-		if columnwon {
+		if rowwon {
 			return true
 		}
 	}
