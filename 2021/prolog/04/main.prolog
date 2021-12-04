@@ -63,10 +63,27 @@ row_sum(Row, Previous, Result):- foldl(box_value, Row, 0, Value), Result is Prev
 
 board_sum(Board, Sum):- foldl(row_sum, Board, 0, Sum).
 
+play_until_last([Number|Numbers], Boards, WinningBoard, FinalNumber):-
+    play_boards(Boards, Number, NewBoards),
+    exclude(winning, NewBoards, LosingBoards),
+    length(LosingBoards, Losers),
+
+    ((Losers is 0) ->
+            member(WinningBoard, NewBoards),
+            FinalNumber = Number
+        ;
+            play_until_last(Numbers, LosingBoards, WinningBoard, FinalNumber)
+    ).
+
+
 :-
  phrase_from_file(input(Numbers, Boards), 'input.txt'),
  play_until_win(Numbers, Boards, Board, FinalNumber),
  board_sum(Board, Sum),
  Answer is Sum * FinalNumber,
- format("~p", Answer),
+ format("~p\n", Answer),
+ play_until_last(Numbers, Boards, LastWinner, LastNumber),
+ board_sum(LastWinner, P2Sum),
+ Answer2 is P2Sum * LastNumber,
+ format("~p\n", Answer2),
  halt.
