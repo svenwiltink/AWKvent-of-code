@@ -80,27 +80,26 @@ func (o OceanFloor) GoString() string {
 func (o OceanFloor) DrawStraightEdge(e Edge) {
 	startx := e.From.X
 	starty := e.From.Y
+
 	endx := e.To.X
 	endy := e.To.Y
 
-	shouldDraw := false
+	isStraightEdge := false
 	if e.From.X == e.To.X { // vertical line
-		shouldDraw = true
+		isStraightEdge = true
 		if e.To.Y < e.From.Y {
-			starty = e.To.Y
-			endy = e.From.Y
+			starty, endy = e.To.Y, e.From.Y
 		}
 	}
 
 	if e.From.Y == e.To.Y { // horizonatal line
-		shouldDraw = true
+		isStraightEdge = true
 		if e.To.X < e.From.X {
-			startx = e.To.X
-			endx = e.From.X
+			startx, endx = e.To.X, e.From.X
 		}
 	}
 
-	if !shouldDraw {
+	if !isStraightEdge {
 		return
 	}
 
