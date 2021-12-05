@@ -9,6 +9,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Coord struct {
@@ -135,6 +136,7 @@ func (o OceanFloor) DrawDiag(e Edge) {
 }
 
 func main() {
+	start := time.Now()
 	f, err := os.Open("input.txt")
 	if err != nil {
 		log.Fatal(err)
@@ -148,15 +150,19 @@ func main() {
 
 	for _, edge := range edges {
 		floor.DrawStraightEdge(edge)
+		// fmt.Printf("%#v\n", floor)
 	}
 
 	fmt.Println(floor.SafestRoute())
+	fmt.Printf("Part 1 time: %v\n", time.Since(start))
+	start = time.Now()
 
 	for _, edge := range edges {
 		floor.DrawDiag(edge)
 	}
 
 	fmt.Println(floor.SafestRoute())
+	fmt.Printf("Part 2 time: %v\n", time.Since(start))
 }
 
 func parseInput(r io.Reader) []Edge {
