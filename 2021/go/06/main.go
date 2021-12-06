@@ -7,9 +7,11 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func main() {
+	start := time.Now()
 	f, err := os.Open("input.txt")
 	if err != nil {
 		log.Fatal(err)
@@ -18,15 +20,23 @@ func main() {
 	defer f.Close()
 
 	fish := parseInput(f)
+
+	fmt.Println("input parsing", time.Since(start))
+	start = time.Now()
+
 	fish = breed(fish, 80)
+	fmt.Println("duration", time.Since(start))
+	start = time.Now()
 	fmt.Println(fishcount(fish))
+
 	fish = breed(fish, 256-80)
+	fmt.Println("duration", time.Since(start))
 	fmt.Println(fishcount(fish))
 }
 
 func breed(fish [9]int, days int) [9]int {
+	newfish := [9]int{}
 	for day := 0; day < days; day++ {
-		newfish := [9]int{}
 		for i := 0; i <= 8; i++ {
 			if i == 0 {
 				newfish[8] = fish[0]
@@ -34,7 +44,12 @@ func breed(fish [9]int, days int) [9]int {
 				continue
 			}
 
-			newfish[i-1] += fish[i]
+			if i == 7 {
+				newfish[i-1] += fish[i]
+				continue
+			}
+
+			newfish[i-1] = fish[i]
 		}
 
 		fish = newfish
