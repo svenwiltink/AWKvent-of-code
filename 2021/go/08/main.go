@@ -62,21 +62,6 @@ func (r Row) EasyNumbers() int {
 	return sum
 }
 
-func (r Row) MapKnownNumbers() {
-	for _, num := range r.Input {
-		switch len(num) {
-		case 2:
-			r.KnownNumbers[1] = num
-		case 3:
-			r.KnownNumbers[7] = num
-		case 7:
-			r.KnownNumbers[8] = num
-		case 4:
-			r.KnownNumbers[4] = num
-		}
-	}
-}
-
 // layout is [TL, T, TR, M, BL, B, BR]
 //
 //          11
@@ -138,7 +123,6 @@ func (r Row) SegmentToNumber(segment string) int {
 }
 
 func (r Row) FindMapping() {
-	r.MapKnownNumbers()
 	Perm([]rune("abcdefg"), func(a []rune) bool {
 		if r.checkDisplay(a) {
 			return true
