@@ -79,7 +79,7 @@ func (r Row) MapKnownNumbers() {
 
 // layout is [TL, T, TR, M, BL, B, BR]
 //
-//			11
+//          11
 //         0  2
 //         0  2
 //          33
