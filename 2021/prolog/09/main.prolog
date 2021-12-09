@@ -30,14 +30,14 @@ highneighbour(Walked, location(X,Y,Z), location(XN, YN, ZN)):-
     ZN > Z,
     ZN < 9.
 
-basin(CurPoint, (Walked,CurSize), ([CurPoint|CompleteWalked], NewSize)):- 
-    ( (bagof(N, highneighbour([CurPoint|Walked], CurPoint, N), Neighbours)) ->
+basin(CurPoint, (Walked,CurSize), (CompleteWalked, NewSize)):- 
+    ( (bagof(N, highneighbour(Walked, CurPoint, N), Neighbours)) ->
 
         length(Neighbours, CurrentNeighbourSize),
         append(Walked,Neighbours,NeighbourWalked),
-        foldl(basin, Neighbours, ([CurPoint|NeighbourWalked],CurrentNeighbourSize), (OtherWalked,NeighbourSize)),
-        CompleteWalked = OtherWalked
 
+        foldl(basin, Neighbours, (NeighbourWalked,CurrentNeighbourSize), (CompleteWalked,NeighbourSize))
+        
     ;   NeighbourSize is 0,
         CompleteWalked = Walked
     ),
