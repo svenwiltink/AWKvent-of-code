@@ -2,10 +2,15 @@ package main
 
 import (
 	"fmt"
+	"image"
+	"image/color"
+	"image/png"
 	"log"
 	"os"
 	"strings"
 )
+
+var frame = 0
 
 type paper struct {
 	contents   map[int]map[int]struct{}
@@ -13,12 +18,40 @@ type paper struct {
 }
 
 func (p *paper) fold(f fold) {
+	curX, curY := p.maxX, p.maxY
+	p.DrawFrame(curX, curY)
+
 	switch f.Direction {
 	case 'x':
 		p.foldVertical(f.Position)
 	case 'y':
 		p.foldHorizontal(f.Position)
 	}
+
+	p.DrawFrame(curX, curY)
+}
+
+func (p *paper) DrawFrame(x, y int) {
+	upLeft := image.Point{0, 0}
+	lowRight := image.Point{x + 1, y + 1}
+
+	img := image.NewRGBA(image.Rectangle{upLeft, lowRight})
+	for y := 0; y <= p.maxY; y++ {
+		for x := 0; x <= p.maxX; x++ {
+			if _, exists := p.contents[x][y]; exists {
+				img.Set(x, y, color.White)
+				continue
+			}
+			img.Set(x, y, color.Black)
+		}
+	}
+
+	f, _ := os.Create(fmt.Sprintf("frames/%02d.png", frame))
+
+	encoder := png.Encoder{CompressionLevel: png.NoCompression}
+	encoder.Encode(f, img)
+
+	frame++
 }
 
 func (p *paper) foldHorizontal(position int) {
@@ -104,7 +137,6 @@ type fold struct {
 
 func main() {
 	p, folds := parseInput()
-
 	firstfold, remaining := folds[0], folds[1:]
 
 	p.fold(firstfold)
