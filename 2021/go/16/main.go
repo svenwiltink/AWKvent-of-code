@@ -17,7 +17,7 @@ const (
 
 func main() {
 	transmission := parseInput()
-	packets := readPacket(transmission.reader, 1)
+	packets := readPacket(transmission, 1)
 	fmt.Printf("%#v\n", packets[0].VersionSum())
 	fmt.Printf("%#v\n", packets[0].Value())
 }
@@ -28,10 +28,6 @@ func readPacket(r io.Reader, subpacket int) []packet {
 		var p basepacket
 		var header [3]byte
 		_, err := io.ReadFull(r, header[:])
-		if errors.Is(err, io.ErrUnexpectedEOF) {
-			return subpackets
-		}
-
 		if errors.Is(err, io.EOF) {
 			return subpackets
 		}
@@ -49,10 +45,9 @@ func readPacket(r io.Reader, subpacket int) []packet {
 
 		switch p.id {
 		case IDValue:
-			v := LiteralValue(r)
 			subpackets = append(subpackets, valuepacket{
 				basepacket: p,
-				value:      v,
+				value:      LiteralValue(r),
 			})
 		default:
 			var lengthType [1]byte
@@ -64,8 +59,8 @@ func readPacket(r io.Reader, subpacket int) []packet {
 			if lengthType[0] == '0' {
 				bits := make([]byte, 15)
 				_, err := io.ReadFull(r, bits)
-				if errors.Is(err, io.EOF) {
-					return subpackets
+				if err != nil {
+					panic(err)
 				}
 
 				numberOfBits, err := strconv.ParseInt(string(bits), 2, 32)
@@ -81,6 +76,10 @@ func readPacket(r io.Reader, subpacket int) []packet {
 			} else {
 				bits := make([]byte, 11)
 				_, err = io.ReadFull(r, bits)
+				if err != nil {
+					panic(err)
+				}
+
 				numberOfPackets, err := strconv.ParseInt(string(bits), 2, 32)
 				if err != nil {
 					panic(err)
@@ -95,13 +94,6 @@ func readPacket(r io.Reader, subpacket int) []packet {
 	}
 
 	return subpackets
-}
-
-type transmission struct {
-	data   []byte
-	offset int
-
-	reader io.Reader
 }
 
 func LiteralValue(r io.Reader) int64 {
@@ -263,7 +255,7 @@ func (v operatorpacket) VersionSum() int64 {
 	return sum
 }
 
-func parseInput() transmission {
+func parseInput() io.Reader {
 	data, err := os.ReadFile("input.txt")
 	if err != nil {
 		log.Fatal(err)
@@ -280,5 +272,5 @@ func parseInput() transmission {
 		instructions = append(instructions, []byte(fmt.Sprintf("%04b", i))...)
 	}
 
-	return transmission{data: instructions, reader: bytes.NewReader(instructions)}
+	return bytes.NewReader(instructions)
 }
