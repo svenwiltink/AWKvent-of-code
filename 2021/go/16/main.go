@@ -22,8 +22,6 @@ func main() {
 	fmt.Printf("%#v\n", packets[0].Value())
 }
 
-var versionNumbers = 0
-
 func readPacket(r io.Reader, subpacket int) []packet {
 	subpackets := make([]packet, 0)
 	for i := 0; i < subpacket; i++ {
@@ -42,8 +40,6 @@ func readPacket(r io.Reader, subpacket int) []packet {
 		if err != nil {
 			panic(err)
 		}
-
-		versionNumbers += int(p.version)
 
 		io.ReadFull(r, header[:])
 		p.id, err = strconv.ParseInt(string(header[:]), 2, 32)
